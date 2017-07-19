@@ -1,14 +1,13 @@
 # A compilation of all my general useful csv parsing functions
 
-# various functions which help parse csvs (and user filename input)
-
-#libraries
+# libraries
 import sys
 import pandas as pd
 import csv
 import shutil
 import os
 import time
+
 
 #functions galore
 def df_to_array(df):
@@ -126,6 +125,3 @@ def The_Date_Time_Seperator(csv_loc, header, new_column_name, delete_old_column=
         print("Time and Date successfully separated in " + header + ' column of ' + csv_loc)
     except:
         print("Something went kind of wrong with the date time separator...")
-
-
-
