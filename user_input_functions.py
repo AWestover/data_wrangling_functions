@@ -3,8 +3,13 @@
 # libraries
 import os
 import sys
+import getpass
 # use raw_input for Python 27, this is for python 3.X
-# sys.version > 3.5.2
+# sys.version -> 3.5.2
+# getpass.getuser() -> alekw
+
+print("Python", sys.version.split(' ')[0])
+print("User", getpass.getuser())
 
 
 # checks for valid input

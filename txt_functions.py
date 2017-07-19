@@ -76,3 +76,23 @@ def caesar_shifter(message, key):
     return new_message
 
 
+# makes sure that a number is turned into a string of a specific length with leading zeros added as needed to increase the length
+def pad(total_length, num):
+    out_string = str(num)
+    if len(out_string) < total_length:
+        out_string = "0"*(total_length-len(out_string)) + out_string
+    elif len(out_string) > total_length:
+        out_string = out_string[0:total_length]
+    return out_string
+
+
+# reverses padding, deleting leading zeros and letters until it gets to something that it can turn in to an integer
+def depad(padded_num):
+    while (str(padded_num[0]).lower() in [str(chr(i)) for i in range(97, 123)] or padded_num[0] == '0') and len(padded_num) > 0:
+        padded_num = padded_num[1:len(padded_num)]  # CHECK
+    return int(padded_num)
+
+
+
+
+
