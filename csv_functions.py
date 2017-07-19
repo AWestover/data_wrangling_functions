@@ -9,7 +9,7 @@ import os
 import time
 
 
-#functions galore
+# functions galore
 def df_to_array(df):
     my_dict = df.to_dict()
     return list(my_dict.values())
