@@ -1,0 +1,25 @@
+# checks for valid input
+def validInput(question, condition):
+    if condition == "valid file name":
+        uin = "not a path"
+        while not os.path.exists(uin):
+            uin = input(question)
+    elif type(condition) == type:
+        uin=None
+        while type(uin) != condition:
+            uin = input(question)
+            try:
+                uin = condition(uin)
+            except:
+                pass
+    elif type(condition) == list:
+        uin = None
+        for i in range(0, len(condition)):
+            if type(condition[i])==int or type(condition[i])==float or type(condition[i])==bool:
+                condition[i]=str(condition[i])
+        while uin not in condition:
+            uin = input(question)
+    else:
+        print("Please carefully input your answer to comply with the following condition : "+condition)
+        uin = input(question)
+    return uin
