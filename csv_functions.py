@@ -46,11 +46,11 @@ def split(csv_loc, column, wanted, new_file_name='_clean.csv'):
 
 
 # list version of above function
-def split_all(csv_loc, collumn, wanteds, new_file_names=None):
+def split_all(csv_loc, column, wanteds, new_file_names=None):
     if not new_file_names:
         new_file_names = len(wanteds)*["_clean.csv"]
     for i in range(0, len(wanteds)):
-        split(csv_loc, collumn, wanteds[i], new_file_name=new_file_names[i])
+        split(csv_loc, column, wanteds[i], new_file_name=new_file_names[i])
 
 
 def clean_folder(directory, folder):

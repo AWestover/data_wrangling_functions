@@ -35,11 +35,15 @@ def txt_file_to_array(txt_file_loc):
 
 
 # takes in a file path of a txt file and turns it in to an string of the text
-def txt_file_to_string(txt_file_loc):
+def txt_file_to_string(txt_file_loc, encoding=False):
     all_text = ''
     if valid_txt_file(txt_file_loc):
-        txt_file = open(txt_file_loc, 'r')
+        if not encoding:
+            txt_file = open(txt_file_loc, 'r') # if this creates an error try setting encoding='utf-8' or 'Latin 1'
+        else:
+            txt_file = open(txt_file_loc, 'r', encoding=encoding)
         for row in txt_file:
+            print (row)
             all_text += row
         txt_file.close()
 
@@ -93,6 +97,6 @@ def depad(padded_num):
     return int(padded_num)
 
 
-
-
-
+# Split a text document by known footers (ie. you have a bunch of stories that say blah blah \nThe End. And you want to separate the stories)
+def split_by_footer(txt_file_loc, encoding=False):
+    print(valid_txt_file(txt_file_loc))
