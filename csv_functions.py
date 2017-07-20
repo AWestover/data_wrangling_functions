@@ -7,6 +7,7 @@ import csv
 import shutil
 import os
 import time
+import json
 
 
 # functions galore
@@ -125,3 +126,75 @@ def The_Date_Time_Seperator(csv_loc, header, new_column_name, delete_old_column=
         print("Time and Date successfully separated in " + header + ' column of ' + csv_loc)
     except:
         print("Something went kind of wrong with the date time separator...")
+
+
+# list of keys and values into a dictionary
+def key_vals_to_dict(keys, vals):
+    my_dict = {}
+    for i in range(0, len(keys)):
+        my_dict[keys[i]] = vals[i]
+    return my_dict
+
+
+# returns each row as a dictionary into a json like object
+def csv_to_json(csv_loc, wanted_columns='all'):
+    if wanted_columns == 'all':
+        wanted_columns = get_headers(csv_loc)
+    wanted_columns_indices = [header_to_index(csv_loc, a_header) for a_header in wanted_columns]
+    my_csv = csv.reader(open(csv_loc, 'r'))
+    my_dicts = []
+    for row in my_csv:
+        wanted_vals = [row[wanted_columns_index] for wanted_columns_index in wanted_columns_indices]
+        my_dicts.append(key_vals_to_dict(wanted_columns, wanted_vals))
+    return my_dicts
+
+
+# checks if a string is equal to any other string in a list
+def any_string_matches(string, list_of_strings):
+    match_found = False
+    for a_string in list_of_strings:
+        if a_string == string:
+            match_found = True
+    return match_found
+
+
+# deletes the weird brackets around a json and all of the other curly brackets and deletes all of the quotes. Danger, you might lose information
+def json_string_to_pretty_text(json_string):
+    pretty_out_string = ''
+    for char in json_string:
+        if not any_string_matches(char, ['"', "{", "}", "[", "]", ","]):
+            pretty_out_string += char
+        elif char == ",":
+            pretty_out_string += "\n"
+        elif char == "}":
+            pretty_out_string += "---------------"
+    return pretty_out_string
+
+
+# puts python stuff (array or dict) into a json
+def data_to_json(json_file_loc, my_data, sort_keys=False, indent=0):
+    with open(json_file_loc, 'w') as fp:
+        json.dump(my_data, fp, sort_keys=sort_keys, indent=indent)
+
+
+# unlikely to be useful, jsons are already nice, but this turns a json into a string
+def json_to_string(json_file_loc):
+    json_data = open(json_file_loc).read()
+    my_string = ''
+    for char in json_data:
+        my_string += char
+        if char == ',':
+            my_string += '\n'
+    return my_string
+
+
+# puts a string into a text file
+def string_to_txt_file(string, file_loc, encoding=False):
+    if not encoding:
+        f = open(file_loc, 'w')
+    else:
+        f = open(file_loc, 'w', encoding=encoding)
+    f.write(string)
+    f.close()
+
+

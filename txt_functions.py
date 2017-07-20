@@ -1,7 +1,14 @@
 # A compilation of all of my useful and general text parsing functions
+# has to run in power shell with setting
+# chcp 65001
+# to set the encoding
+# if running in pycharm you can't print anything...
+# https://stackoverflow.com/questions/32382686/unicodeencodeerror-charmap-codec-cant-encode-character-u2010-character-m
+
 
 # libraries
 import os
+import pdb
 
 
 # functions
@@ -39,11 +46,10 @@ def txt_file_to_string(txt_file_loc, encoding=False):
     all_text = ''
     if valid_txt_file(txt_file_loc):
         if not encoding:
-            txt_file = open(txt_file_loc, 'r') # if this creates an error try setting encoding='utf-8' or 'Latin 1'
+            txt_file = open(txt_file_loc, 'r')  # if this creates an error try setting encoding='utf-8' or 'Latin 1'
         else:
             txt_file = open(txt_file_loc, 'r', encoding=encoding)
         for row in txt_file:
-            print (row)
             all_text += row
         txt_file.close()
 
@@ -98,5 +104,87 @@ def depad(padded_num):
 
 
 # Split a text document by known footers (ie. you have a bunch of stories that say blah blah \nThe End. And you want to separate the stories)
-def split_by_footer(txt_file_loc, encoding=False):
-    print(valid_txt_file(txt_file_loc))
+def split_by_footer(txt_file_loc, footer, encoding=False):
+    sections = []
+    if valid_txt_file(txt_file_loc):
+        if not encoding:
+            txt_file = open(txt_file_loc, 'r')
+        else:
+            txt_file = open(txt_file_loc, 'r', encoding=encoding)
+        cur_section = ''
+        for row in txt_file:
+            cur_section += row
+            if footer in row:
+                sections.append(cur_section)
+                cur_section = ''
+        txt_file.close()
+    else:
+        print("Put an invalid file name in to split_by_full. Cannot find", txt_file_loc)
+    return sections
+
+
+# puts a string into a text file
+def string_to_txt_file(string, file_loc, encoding=False):
+    if not encoding:
+        f = open(file_loc, 'w')
+    else:
+        f = open(file_loc, 'w', encoding=encoding)
+    f.write(string)
+    f.close()
+
+
+# turns an array of strings (which are presumably rows of a text file) in to a string with line breaks
+def rows_to_string(array):
+    out_string = ''
+    for row in array:
+        out_string += row + '\n'
+    return out_string
+
+
+# checks if a string is equal to any other string in a list
+def any_string_matches(string, list_of_strings):
+    match_found = False
+    for a_string in list_of_strings:
+        if a_string == string:
+            match_found = True
+    return match_found
+
+
+# deletes the weird brackets around a json and all of the other curly brackets and deletes all of the quotes. Danger, you might lose information
+def json_string_to_pretty_text(json_string):
+    pretty_out_string = ''
+    for char in json_string:
+        if not any_string_matches(char, ['"', "{", "}", "[", "]", ","]):
+            pretty_out_string += char
+        elif char == ",":
+            pretty_out_string += "\n"
+        elif char == "}":
+            pretty_out_string += "---------------"
+    return pretty_out_string
+
+
+# after the program sees a key work it looks for the next instance
+# of something else and returns the strip of text encapsulated by the range words
+# this will return all of the excerpts of this kind
+# mark_words must contain only 2 words
+def txt_word_range(mark_words, txt_string):
+    all_words = string_to_words(txt_string, to_lower_case=True)
+    mark = 0
+    excerpts = []
+    string_mark = 0
+    for i in range(0, len(all_words)):
+        if mark_words[mark] in all_words[i]:
+            if mark == 0:
+                mark = 1
+                string_mark = i
+            else:
+                mark = 0
+                excerpts.append(all_words[string_mark:i+1])
+    return excerpts
+
+
+entries = split_by_footer('data/pubmed_result.txt', 'PMID', encoding='utf-8')
+for i in range(1, 10):
+    print(txt_word_range(["specificity", "%"], entries[i]))
+    # string_to_txt_file(entries[i], "excerpt"+str(i)+".txt", encoding='utf-8')
+

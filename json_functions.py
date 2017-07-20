@@ -16,8 +16,19 @@ def json_to_list(json_file_loc):
     return my_list
 
 
+# unlikely to be useful, jsons are already nice, but this turns a json into a string
+def json_to_string(json_file_loc):
+    json_data = open(json_file_loc).read()
+    my_string = ''
+    for char in json_data:
+        my_string += char
+        if char == ',':
+            my_string += '\n'
+    return my_string
+
+
 # puts python stuff (array or dict) into a json
-def dict_to_json(json_file_loc, my_data, sort_keys=False, indent=0):
+def data_to_json(json_file_loc, my_data, sort_keys=False, indent=0):
     with open(json_file_loc, 'w') as fp:
         json.dump(my_data, fp, sort_keys=sort_keys, indent=indent)
 
@@ -34,6 +45,6 @@ more_info = {
     'as': 'df'
 }
 all_info = [my_info, more_info]
-dict_to_json('data/new_json.json', all_info, sort_keys=True, indent=4)
+data_to_json('data/new_json.json', all_info, sort_keys=True, indent=4)
 print(json_to_list("data/new_json.json"))
 '''
