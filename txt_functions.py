@@ -9,7 +9,7 @@
 # libraries
 import os
 import pdb
-
+import re
 
 # functions
 
@@ -59,12 +59,17 @@ def txt_file_to_string(txt_file_loc, encoding=False):
 
 
 # splits up a string of text by spacing and returns an array of words
-def string_to_words(string: str, remove_punctuation=False, to_lower_case=False) -> list:
+def string_to_words(string: str, remove_punctuation='no', to_lower_case=False) -> list:
     if to_lower_case:
         string = string.lower()
     all_words = string.split(' ')
-    if remove_punctuation:
-        punctuation_list = [',', '.', '!', '?']
+    if remove_punctuation == 'yes':
+        punctuation_list = [',', '.', '!', '?', '\n']
+        for i in range(0, len(all_words)):
+            for punctuation in punctuation_list:
+                all_words[i] = all_words[i].replace(punctuation, '')
+    if remove_punctuation == 'For math!':
+        punctuation_list = [',', '!', '?', '\n']
         for i in range(0, len(all_words)):
             for punctuation in punctuation_list:
                 all_words[i] = all_words[i].replace(punctuation, '')
@@ -150,25 +155,12 @@ def any_string_matches(string, list_of_strings):
     return match_found
 
 
-# deletes the weird brackets around a json and all of the other curly brackets and deletes all of the quotes. Danger, you might lose information
-def json_string_to_pretty_text(json_string):
-    pretty_out_string = ''
-    for char in json_string:
-        if not any_string_matches(char, ['"', "{", "}", "[", "]", ","]):
-            pretty_out_string += char
-        elif char == ",":
-            pretty_out_string += "\n"
-        elif char == "}":
-            pretty_out_string += "---------------"
-    return pretty_out_string
-
-
 # after the program sees a key work it looks for the next instance
 # of something else and returns the strip of text encapsulated by the range words
 # this will return all of the excerpts of this kind
 # mark_words must contain only 2 words
 def txt_word_range(mark_words, txt_string):
-    all_words = string_to_words(txt_string, to_lower_case=True)
+    all_words = string_to_words(txt_string, to_lower_case=True, remove_punctuation='For math!')
     mark = 0
     excerpts = []
     string_mark = 0
@@ -183,8 +175,42 @@ def txt_word_range(mark_words, txt_string):
     return excerpts
 
 
+# gets all of the percents (by looking for % signs and then backing up to look for a number)
+# assumes that the percent is either formatted as num% (we remove all the spaces so spacing doesn't matter). Other formats are BAD!!!
+def get_all_percents(string):
+    better_string = string.replace(' ', '')
+    all_percents = []
+    for i in range(0, len(better_string)):
+        if better_string[i] == "%":
+            backwards_i = 1
+            while better_string[i - backwards_i] == '.' or better_string[i - backwards_i].isdigit() or better_string[i - backwards_i] == ' ':
+                backwards_i += 1
+            all_percents.append(better_string[i-backwards_i+1:i+1])
+    return all_percents
+
+
+# pubmed analysis execution
 entries = split_by_footer('data/pubmed_result.txt', 'PMID', encoding='utf-8')
-for i in range(1, 10):
-    print(txt_word_range(["specificity", "%"], entries[i]))
-    # string_to_txt_file(entries[i], "excerpt"+str(i)+".txt", encoding='utf-8')
+for i in range(0, 20):
+    # print(txt_word_range(["specificity", "%"], entries[i]))
+    # string_to_txt_file(entries[i], "data/excerpt"+str(i)+".txt", encoding='utf-8')
+    print(get_all_percents(entries[i]))
+
+
+'''
+on pubmed you can do advanced searches as drop down menu logic
+and this is what it looks like in parentheses:
+this one yielded over 100,000 abstracts.  I'm not sure how much more restrictive to be.
+(((((((sensitivity) AND specificity) AND human) NOT genetic) NOT AUC) NOT ROC) NOT receiver operating curve) AND english[Language] AND "predictive value" AND diagnostic
+the idea was to avoid genetics, and avoid people reporting AUC or ROC values (where random chance is obvious).
+
+
+ideas:
+1. extract all percent and nums from each file to their  entry in a json
+2. get the closest instance of a statistical term to each thing
+send
+closest flexible([sens, spec, pos, neg]), float, '%' pair
+'''
+
+
 

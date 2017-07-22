@@ -39,6 +39,12 @@ def valid_input(question, condition):
         while not os.path.exists(uin) or '.xls' not in uin:
             uin = input(question)
 
+    elif condition == "yes or no":
+        uin = None
+        all_responses = ["y", "n", "yes", "ye", "no", "nah"]
+        while uin.lower() not in all_responses:
+            uin = input(question)
+
     elif type(condition) == type:
         uin = None
         while type(uin) != condition:

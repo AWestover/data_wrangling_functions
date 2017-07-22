@@ -72,20 +72,23 @@ def get_column(csv_loc, column_index):
 
 
 # csv is the file name, wanted is a thing to extract, column is where to look for it
-def filter_creator(csv_loc, column, wanteds):
+# looks in one column for anything in a list of wanteds and returns a df with only rows that had a wanted in the column
+# that we are inspecting
+# this is different than split bc wanteds is a list not a value
+# exclude specifies whether the wanteds are wanted for exclusion or inclusion
+# if you say exclusion=True the new csv will have no rows with a column that contains a wanted
+# but if you say exclude=False all of the rows will have a column with a wanted in it
+def filter_creator(csv_loc, column, wanteds, exclude=False):
     my_csv = csv.reader(open(csv_loc, 'r'))
-    rows = []
+    good_rows = []
     for row in my_csv:
-        rows.append(row)
-    marked_rows = []
-    for i in range(0, len(rows)):
-        for wanted in wanteds:
-            if wanted == rows[i][column]:
-                marked_rows.append(i)
-                break
-
-    my_dict = array_to_dict([rows[marked_row] for marked_row in marked_rows], rows[0])
-
+        if not exclude:
+            if row[column] in wanteds:
+                good_rows.append(row)
+        else:
+            if row[column] not in wanteds:
+                good_rows.append(row)
+    my_dict = array_to_dict(good_rows, get_headers(csv_loc))
     df = pd.DataFrame.from_dict(my_dict)
     df.to_csv(csv_loc.replace('.csv', "_clean.csv"), index=False)
 
@@ -158,17 +161,17 @@ def any_string_matches(string, list_of_strings):
     return match_found
 
 
-# deletes the weird brackets around a json and all of the other curly brackets and deletes all of the quotes. Danger, you might lose information
-def json_string_to_pretty_text(json_string):
-    pretty_out_string = ''
-    for char in json_string:
-        if not any_string_matches(char, ['"', "{", "}", "[", "]", ","]):
-            pretty_out_string += char
-        elif char == ",":
-            pretty_out_string += "\n"
-        elif char == "}":
-            pretty_out_string += "---------------"
-    return pretty_out_string
+# makes a json more readable as a string that is better in a txt file
+def simple_json_to_pretty_text(json_data):
+    out_string = ''
+    if type(json_data) == dict:
+        all_keys = list(json_data.keys())
+        for a_key in all_keys:
+            out_string += a_key + ": " + json_data[a_key]+ "\n"
+    elif type(json_data) == list:
+        for element in json_data:
+            out_string += simple_json_to_pretty_text(element) + "-"*30 + "\n"
+    return out_string
 
 
 # puts python stuff (array or dict) into a json
@@ -196,5 +199,26 @@ def string_to_txt_file(string, file_loc, encoding=False):
         f = open(file_loc, 'w', encoding=encoding)
     f.write(string)
     f.close()
+
+
+# puts out a new df with only specified columns
+# exclusion=False means include the wanteds columns
+# exclusion=True means exclude the wanteds columns
+def column_excluder(csv_file_loc, wanteds, exclusion=False):
+    try:
+        df = pd.read_csv(csv_file_loc)
+        headers = list(df)
+        if not exclusion:
+            new_columns = wanteds
+        else:
+            new_columns = []
+            for header in headers:
+                if header not in wanteds:
+                    new_columns.append(header)
+        out_df = df[new_columns]  # yes i know that is an array inside of an array deal with it
+        return out_df
+    except PermissionError:
+        print("Please close all files that you would like Python to work with!")
+        return None
 
 
