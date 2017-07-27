@@ -1,5 +1,5 @@
-# functions to help with email sending and parsing
-
+# Alek Westover
+# emailing python bot
 
 # libraries
 import smtplib
@@ -9,9 +9,9 @@ from email.mime.text import MIMEText
 import configparser as cp
 import time
 
-
-# functions
-
+print("Almost up")
+time.sleep(1)
+print("Emailer running")
 
 # takes text and moves every letter up by a standard key
 def caesar_shifter(message, key):
@@ -29,13 +29,9 @@ def caesar_shifter(message, key):
 
 
 # for easy selection of a config file
-def get_config(env):
+def get_config(path):
     c_config = cp.ConfigParser()
-    if env == "DEV":
-        c_config.read(['config/development.cfg'])
-    # I could have a separate config for my real email and my fake one but i don't at the moment
-    elif env == "PROD":
-        c_config.read(['config/production.cfg'])
+    c_config.read([path])
     return c_config
 
 
@@ -102,11 +98,11 @@ def respond_all(unm: str, pwd: str):
     print("Your messages were responded to and deleted\n")
 
 
-
-print(get_config("DEV").get('email', 'user'))
+config_loc = "C:/Users/config/development.cfg"
+print(get_config(config_loc).get('email', 'user'))
 time.sleep(3)
 # use config to get user and pwd
-config = get_config("DEV")
+config = get_config(config_loc)
 my_user = config.get('email', 'user')
 my_pwd = config.get('email', 'password')
 server = False
