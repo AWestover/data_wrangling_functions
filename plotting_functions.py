@@ -2,10 +2,30 @@
 
 # libraries
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Rectangle
 import numpy as np
 import scipy.stats as sss
 
 # functions
+
+
+# plots rectnalges instead of points
+def make_rectangle_plot(ax, xdata, ydata, width, height,
+                        facecolor='r', edgecolor='None', alpha=0.5,
+                        centered_x=True, centered_y=True):
+    rectangles = []
+    if centered_x:
+        xdata = [xdata[i]-width/2 for i in range(0, len(xdata))]
+    if centered_y:
+        ydata = [ydata[i]-height/2 for i in range(0, len(ydata))]
+    for x, y, in zip(xdata, ydata):
+        # x, y is the bottom left for positive width, height and no centering
+        rect = Rectangle((x, y), width, height)
+        rectangles.append(rect)
+    pc = PatchCollection(rectangles, facecolor=facecolor, alpha=alpha, edgecolor=edgecolor)
+    ax.add_collection(pc)
 
 
 # Finds the area under a curve with a riemann sum
@@ -16,15 +36,21 @@ def integrate(xs, ys):
     return h_first + h_last + r_middle
 
 
-# Generates a kde and histogram for a list of points on a subplot (it is general(ish) but the variable names weren't worth changing)
-def kde_and_hist(peak_time_differences, subplot, bin_width=0.1):
-    peak_differences_xrange = [0, 2]
-    peak_differences_xgrid = np.linspace(peak_differences_xrange[0], peak_differences_xrange[1], 1000)
-    if len(peak_time_differences) > 1:
-        bin_locs = np.arange(min(peak_time_differences), max(peak_time_differences) + bin_width, bin_width)
-        subplot.hist(peak_time_differences, facecolor='green', alpha=0.1, bins=bin_locs, normed=1)
-        density = sss.gaussian_kde(peak_time_differences)
-        subplot.plot(peak_differences_xgrid, [density(peak_differences_xgrid)[i] for i in range(0, len(peak_differences_xgrid))])
+# Generates a kde and histogram for a list of points on a subplot
+def kde_and_hist(xs, subplot, bin_width=0.1, normed=1):
+    r_hist_normed = 1
+    if normed != 1:  # we only norm the histogram if normed is set to 1
+        r_hist_normed = 0
+
+    xrange = [min(xs), max(xs)]
+    xgrid = np.linspace(xrange[0], xrange[1], 1000)
+    if len(xs) > 1:
+        bin_locs = np.arange(min(xs), max(xs) + bin_width, bin_width)
+        subplot.hist(xs, facecolor='green', alpha=0.1, bins=bin_locs, normed=r_hist_normed)
+        density = sss.gaussian_kde(xs)
+        subplot.plot(xgrid, [normed*density(xgrid)[i] for i in range(0, len(xgrid))])  # normed * is a bit weird and sketchy
+
+
 
 '''
 # dynamic plot example
@@ -44,6 +70,29 @@ for i in range(1000):
 
 while True:
     plt.pause(0.05)
+
+
+
+fig = plt.figure()
+plt = fib.add_sub_plot(3, 1, (1, 2))  # puts the plot in boxes 1 and 2
+# essentially makes it twice as big as the plot that will occupy just box 3
+
+
+#keys and custom tick marks
+
+fig = plt.figure(figsize=figure_size)
+pt_ua_plot = fig.add_subplot(1,1,1)
+pt_ua_plot.set_yticks(list(test_height_dict.values()))
+pt_ua_plot.set_yticklabels(list(test_height_dict.keys()), fontsize=12)
+
+pt_ua_plot.set_xticks(time_ticks)
+pt_ua_plot.set_xticklabels(time_labels, rotation=60)
+
+red_patch = mpatches.Patch(color='red', label='Positive')
+green_patch = mpatches.Patch(color='green', label='Negitive')
+plt.legend(handles=[red_patch, green_patch])
+
+
 '''
 
 

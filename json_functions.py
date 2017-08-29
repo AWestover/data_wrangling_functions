@@ -2,6 +2,8 @@
 
 # libraries
 import json
+import pandas as pd
+import csv
 
 
 # functions
@@ -52,6 +54,61 @@ def simple_json_to_pretty_text(json_data):
     elif type(json_data) == list:
         for element in json_data:
             out_string += simple_json_to_pretty_text(element) + "-"*30 + "\n"
+    return out_string
+
+
+# turns a list of tuples into a nice string
+def tuple_list_to_nice_string(tuple_list):
+    nice_string = ''
+    for tup in tuple_list:
+        nice_string += str(tup) + ", "
+    nice_string = nice_string[0:len(nice_string)-2]
+    return nice_string
+
+
+# list of keys and values into a dictionary
+def key_vals_to_dict(keys, vals):
+    my_dict = {}
+    for i in range(0, len(keys)):
+        my_dict[keys[i]] = vals[i]
+    return my_dict
+
+
+# returns each row as a dictionary into a json like object
+def csv_to_json(csv_loc, wanted_columns='all'):
+    my_csv = pd.read_csv(csv_loc)
+    if wanted_columns == 'all':
+        wanted_columns = list(my_csv)
+    wanted_columns_indices = [list(my_csv).index(a_header) for a_header in wanted_columns]
+    my_csv = csv.reader(open(csv_loc, 'r'))
+    my_dicts = []
+    for row in my_csv:
+        wanted_vals = [row[wanted_columns_index] for wanted_columns_index in wanted_columns_indices]
+        my_dicts.append(key_vals_to_dict(wanted_columns, wanted_vals))
+    return my_dicts
+
+
+# makes a json more readable, WARNING VERY SPECIALIZED, NOT REALLY REUSABLE
+def simple_json_to_extra_pretty_text(json_data, split_parenths=False):
+    out_string = ''
+    if type(json_data) == dict:
+        all_keys = list(json_data.keys())
+        for a_key in all_keys:
+            if split_parenths:  # splits tuples
+                cur_string_list = json_data[a_key]
+                cur_string_list = cur_string_list.replace(',', ' ')
+                cur_string_list = cur_string_list.replace("'", '')
+                cur_string_list = cur_string_list.split(')  (')
+                out_string += "\n"+a_key + ":\n"
+                for element in cur_string_list:
+                    c_element = element.replace(')','')
+                    c_element = c_element.replace('(', '')
+                    out_string += c_element + "\n"
+            else:  # default
+                out_string += a_key + ": " + json_data[a_key]+ "\n\n"
+    elif type(json_data) == list:
+        for element in json_data:
+            out_string += simple_json_to_extra_pretty_text(element, split_parenths = split_parenths) + "-"*140 + "\n"
     return out_string
 
 

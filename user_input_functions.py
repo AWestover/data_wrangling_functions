@@ -53,6 +53,7 @@ def valid_input(question, condition):
                 uin = condition(uin)
             except:
                 pass
+
     elif type(condition) == list:
         uin = None
         for i in range(0, len(condition)):
@@ -60,7 +61,9 @@ def valid_input(question, condition):
                 condition[i] = str(condition[i])
         while uin not in condition:
             uin = input(question)
+
     else:
         print("Please carefully input your answer to comply with the following condition : "+condition)
         uin = input(question)
+
     return uin

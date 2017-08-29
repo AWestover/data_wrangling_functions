@@ -8,6 +8,7 @@ import shutil
 import os
 import time
 import json
+from distutils.dir_util import copy_tree
 
 
 # functions galore
@@ -16,6 +17,12 @@ def df_to_array(df):
     return list(my_dict.values())
 
 
+# out puts a list of the unique elements in a list
+def unique(array: list) -> list:
+    return list(set(array))
+
+
+# turns an array into a dictionary, by assigning the elements to the header keys
 def array_to_dict(array, headers):
     my_dict = {}
     for j in range(0, len(headers)):
@@ -54,20 +61,26 @@ def split_all(csv_loc, column, wanteds, new_file_names=None):
         split(csv_loc, column, wanteds[i], new_file_name=new_file_names[i])
 
 
+# makes a folder in the given directory if none exists, and clears out the old stuff from the folder if it already exists
 def clean_folder(directory, folder):
     if folder in os.listdir(directory):
-        print("Im deleting you csvs folder")
-        print("you have 10 seconds to move it before I through it away")
-        time.sleep(1)
+        print("I am putting the contents of your " + folder + " folder in the directory old inside your folders current directory")
+        print("This is so that my program can create files in the new folder.")
+        if 'old' not in os.listdir(directory):
+            os.mkdir(directory + '/old')
+        copy_tree(directory+"/"+folder, directory + '/old')
         shutil.rmtree(directory+'/'+folder)
     os.mkdir(directory + '/' + folder)
 
 
-def get_column(csv_loc, column_index):
+# gets a column from a csv by its index
+def get_column(csv_loc, column_index, header=True):
     my_csv = csv.reader(open(csv_loc, 'r'))
     column = []
     for row in my_csv:
         column.append(row[column_index])
+    if not header:
+        column.pop(0)
     return column
 
 
@@ -191,34 +204,46 @@ def json_to_string(json_file_loc):
     return my_string
 
 
-# puts a string into a text file
-def string_to_txt_file(string, file_loc, encoding=False):
-    if not encoding:
-        f = open(file_loc, 'w')
-    else:
-        f = open(file_loc, 'w', encoding=encoding)
-    f.write(string)
-    f.close()
-
-
-# puts out a new df with only specified columns
-# exclusion=False means include the wanteds columns
-# exclusion=True means exclude the wanteds columns
-def column_excluder(csv_file_loc, wanteds, exclusion=False):
+# puts out a new df without only specified columns
+def column_excluder(df, not_wanteds):
     try:
-        df = pd.read_csv(csv_file_loc)
         headers = list(df)
-        if not exclusion:
-            new_columns = wanteds
-        else:
-            new_columns = []
-            for header in headers:
-                if header not in wanteds:
-                    new_columns.append(header)
+        new_columns = []
+        for header in headers:
+            if header not in not_wanteds:
+                new_columns.append(header)
         out_df = df[new_columns]  # yes i know that is an array inside of an array deal with it
         return out_df
     except PermissionError:
         print("Please close all files that you would like Python to work with!")
         return None
 
+
+# gets all rows of a df where a phrase occours in a column in the row
+def get_phrase_rows(csv_loc, column, phrase, case_sensitive=False, exclusion=False):
+    my_csv = csv.reader(open(csv_loc, 'r'))
+    good_rows = []
+    headers = False
+    column_index = 0
+    for row in my_csv:
+        if not headers:
+            headers = row
+            column_index = headers.index(column)
+        else:
+            if case_sensitive:
+                if not exclusion:
+                    if phrase in row[column_index]:
+                        good_rows.append(row)
+                else:
+                    if phrase not in row[column_index]:
+                        good_rows.append(row)
+            else:
+                if not exclusion:
+                    if phrase.lower() in row[column_index].lower():
+                        good_rows.append(row)
+                else:
+                    if phrase.lower() not in row[column_index].lower():
+                        good_rows.append(row)
+    my_dict = array_to_dict(good_rows, headers)
+    return pd.DataFrame.from_dict(my_dict)
 

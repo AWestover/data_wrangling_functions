@@ -10,13 +10,71 @@
 import os
 import pdb
 import re
+import pprint
 
 # functions
+
+
+# flips a string
+def reverse_string(a_string):
+    return a_string[::-1]
+
+
+# alphabetizes all rows of a text document and returns it as a string
+def alphabetize_txt(txt_loc):
+    txt_file = open(txt_loc, 'r')
+    rows = []
+    for row in txt_file:
+        rows.append(row)
+    rows.sort()
+    out_string = ''
+    for row in rows:
+        out_string += row
+    return out_string
+
+
+# calculates the average
+def avg(array):
+    sum_a = 0
+    for element in array:
+        sum_a += element
+    return sum_a/len(array)
+
+
+# calculates std dev with n-1 denominator
+def std_dev_population(array):
+    error_sum = 0
+    the_mean = avg(array)
+    for element in array:
+        error_sum += (element - the_mean)**2
+
+    return (error_sum/(len(array)-1))**0.5
+
+
+# nice display of a row for text tables
+def pad_row_display(array, allowed_lengths, extra_pad_lengths):
+    out_string = ""
+    for i in range(0, len(array)):
+        if len(array[i]) > allowed_lengths[i]:
+            out_string += array[i][0:allowed_lengths[i]]
+        else:
+            out_string += array[i] + ' '*(allowed_lengths[i] - len(array[i]))
+        out_string += ' '*extra_pad_lengths[i]
+    return out_string
 
 
 # Checks if a location (file or folder name) exists on your computer
 def location_exists(name: str) -> bool:
     return os.path.exists(name)
+
+
+# checks if all files in a list of names exist
+def all_locations_exists(names: str) -> bool:
+    all_exist = True
+    for name in names:
+        if not os.path.exists(name):
+            all_exist = False
+    return all_exist
 
 
 # checks if a file 1. exists and 2. is a text file
@@ -187,30 +245,5 @@ def get_all_percents(string):
                 backwards_i += 1
             all_percents.append(better_string[i-backwards_i+1:i+1])
     return all_percents
-
-
-# pubmed analysis execution
-entries = split_by_footer('data/pubmed_result.txt', 'PMID', encoding='utf-8')
-for i in range(0, 20):
-    # print(txt_word_range(["specificity", "%"], entries[i]))
-    # string_to_txt_file(entries[i], "data/excerpt"+str(i)+".txt", encoding='utf-8')
-    print(get_all_percents(entries[i]))
-
-
-'''
-on pubmed you can do advanced searches as drop down menu logic
-and this is what it looks like in parentheses:
-this one yielded over 100,000 abstracts.  I'm not sure how much more restrictive to be.
-(((((((sensitivity) AND specificity) AND human) NOT genetic) NOT AUC) NOT ROC) NOT receiver operating curve) AND english[Language] AND "predictive value" AND diagnostic
-the idea was to avoid genetics, and avoid people reporting AUC or ROC values (where random chance is obvious).
-
-
-ideas:
-1. extract all percent and nums from each file to their  entry in a json
-2. get the closest instance of a statistical term to each thing
-send
-closest flexible([sens, spec, pos, neg]), float, '%' pair
-'''
-
 
 

@@ -19,4 +19,5 @@ def xls_to_csvs(new_folder: str, xls_file_loc: str):
     except PermissionError:
         print("Please close the the file I can't access it while you have it open")
 
-xls_to_csvs('data', 'data/test.xlsx')
+# usage
+# xls_to_csvs('data', 'data/test.xlsx')
