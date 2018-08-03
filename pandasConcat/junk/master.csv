@@ -1,0 +1,3 @@
+fileName,DateOfVisit,age,sexM,sexF,height,weight,weightInLab,ESS,BMI
+junk.csv, 1/23/2018,  73  years,1,1, Feet  5 Inches  9,  155  lbs,  no scale,11,22.9
+junk2.csv, 1/30/18, 74  years,1,1, Feet 5  Inches 8,205,,4,31.2
